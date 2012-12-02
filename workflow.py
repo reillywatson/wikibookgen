@@ -2,6 +2,8 @@ import subprocess
 import codecs
 import epub
 from optparse import OptionParser
+import os
+import multiprocessing
 
 def get_book_fields(path):
 	book = epub.open_epub(path)
@@ -19,20 +21,31 @@ parser.add_option('--pass', dest='password')
 userName = options.userName
 password = options.password
 
+mutex = multiprocessing.Lock()
+
+def process_book(cat):
+	print 'processing %s' % cat
+	filename = os.tempnam('.')[2:].replace('.','-') + '.epub'
+	print filename
+	retcode = subprocess.call(['casperjs', 'main.js', '--cat=%s'%cat, '--out=%s'%filename])
+	if retcode != 0:
+		print 'failed to fetch!'
+		return False
+	(title, summary) = get_book_fields(filename)
+	retcode = subprocess.call(['casperjs', 'publish.js', '--file=%s'%filename, '--title=%s'%title, '--summary=%s'%summary, '--user=%s'%userName, '--pass=%s'%password])
+	if retcode != 0:
+		print 'failed to publish!'
+		return False
+	with mutex:
+		with codecs.open('done.txt', 'a', 'utf8') as out:
+			out.write(cat+'\n')
+	print 'success!'
+	os.remove(filename)
+	return True
+
 cats = codecs.open('cats.txt', 'r', 'utf-8').read().split('\n')
 published = codecs.open('done.txt', 'r', 'utf-8').read().split('\n')
 cats = [a for a in cats if a not in published]
-for cat in cats:
-	print 'processing %s' % cat
-	retcode = subprocess.call(['casperjs', 'main.js', '--cat=%s'%cat])
-	if retcode != 0:
-		print 'failed to fetch!'
-		continue
-	(title, summary) = get_book_fields('test.epub')
-	retcode = subprocess.call(['casperjs', 'publish.js', '--title=%s'%title, '--summary=%s'%summary, '--user=%s'%userName, '--pass=%s'%password])
-	if retcode != 0:
-		print 'failed to publish!'
-		continue
-	with codecs.open('done.txt', 'a', 'utf8') as out:
-		out.write(cat+'\n')
-	print 'success!'
+p = multiprocessing.Pool(4)
+p.map(process_book, cats)
+
