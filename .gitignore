@@ -10,3 +10,5 @@ test.epub
 done.txt
 
 *.epub
+
+pubfail*.png
