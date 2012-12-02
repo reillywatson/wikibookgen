@@ -2,13 +2,7 @@ var toTitleCase = function(str) {
     return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
 }
 
-var casper = require('casper').create({
-    onError: function(self, m) {   // Any "error" level message will be written
-        console.log('FATAL:' + m); // on the console output and PhantomJS will
-        self.exit();               // terminate
-    }
-});
-
+var casper = require('casper').create();
 
 if (!casper.cli.has('cat')) {
 	casper.die('required parameter: --cat=some_category_url', 1);
@@ -16,14 +10,13 @@ if (!casper.cli.has('cat')) {
 	casper.run();
 }
 
-
 var categoryUrl = casper.cli.get('cat');
 var bookTitle = categoryUrl.replace(/_/g, ' ');
 bookTitle = toTitleCase(bookTitle);
 var urlEncodedCategory = categoryUrl.replace(/_/g , ' ');
 urlEncodedCategory = encodeURIComponent(urlEncodedCategory);
 
-casper.start('http://en.wikipedia.org/wiki/Category:'+categoryUrl, function() { this.echo('started for category: ' + bookTitle); });
+casper.start('http://en.wikipedia.org/wiki/Category:'+categoryUrl, function() { this.echo('Preparing book'); });
 
 casper.then(function() {
 	this.click('#coll-create_a_book a');
@@ -36,6 +29,10 @@ casper.then(function() {
 casper.thenOpen('http://en.wikipedia.org/w/index.php?title=Special:Book&bookcmd=add_category&cattitle='+urlEncodedCategory);
 
 casper.then(function() {
+	if (this.fetchText('#firstHeading').indexOf('Book too big') > -1) {
+		this.die('book too big!', 1);
+		return;
+	}
 	this.click('a.collection-creatorbox-iconlink');
 });
 
