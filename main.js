@@ -15,15 +15,8 @@ var urlEncodedCategory = categoryUrl.replace(/_/g , ' ');
 urlEncodedCategory = encodeURIComponent(urlEncodedCategory);
 
 casper.start('http://en.wikipedia.org/wiki/Category:'+categoryUrl, function() { this.echo('Preparing book'); });
-
-casper.then(function() {
-	this.click('#coll-create_a_book a');
-});
-
-casper.then(function() {
-	this.click('div.collection-button.ok a');
-});
-
+casper.thenClick('#coll-create_a_book a');
+casper.thenClick('div.collection-button.ok a');
 casper.thenOpen('http://en.wikipedia.org/w/index.php?title=Special:Book&bookcmd=add_category&cattitle='+urlEncodedCategory);
 
 casper.then(function() {
@@ -32,12 +25,6 @@ casper.then(function() {
 		return;
 	}
 	this.click('a.collection-creatorbox-iconlink');
-});
-
-casper.then(function() {
-	this.fill('form#mw-collection-title-form', {
-		'collectionTitle' : bookTitle
-	}, true);
 });
 
 casper.thenOpen('http://en.wikipedia.org/wiki/Special:Book',
