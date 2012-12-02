@@ -35,18 +35,20 @@ password = options.password
 mutex = multiprocessing.Lock()
 
 def process_book(cat):
+	filename = os.tempnam('.')[2:].replace('.','-') + '.epub'
 	try:
 		print 'processing %s' % cat
-		filename = os.tempnam('.')[2:].replace('.','-') + '.epub'
 		print filename
 		retcode = subprocess.call(['casperjs', 'main.js', '--cat=%s'%cat, '--out=%s'%filename])
 		if retcode != 0:
 			print 'failed to fetch!'
+			os.remove(filename)
 			return False
 		(title, summary) = get_book_fields(filename)
 		retcode = subprocess.call(['casperjs', 'publish.js', '--file=%s'%filename, '--title=%s'%title, '--summary=%s'%summary, '--user=%s'%userName, '--pass=%s'%password])
 		if retcode != 0:
 			print 'failed to publish!'
+			os.remove(filename)
 			return False
 		with mutex:
 			with codecs.open('done.txt', 'a', 'utf8') as out:
@@ -56,6 +58,7 @@ def process_book(cat):
 		return True
 	except:
 		print 'exception!'
+		os.remove(filename)
 		return False
 
 cats = codecs.open('cats.txt', 'r', 'utf-8').read().split('\n')
