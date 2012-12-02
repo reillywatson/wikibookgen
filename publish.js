@@ -7,7 +7,6 @@ var casper = require('casper').create({
 
 casper.thenClickLabel = function(lbl) {
 	return this.then(function() {
-		this.echo('clicking label: ' + lbl);
 		this.clickLabel(lbl);
 	});
 };
