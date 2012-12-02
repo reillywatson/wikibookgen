@@ -8,10 +8,10 @@ import multiprocessing
 def get_book_fields(path):
 	book = epub.open_epub(path)
 	chapterNames = [a.labels[0][0] for a in book.toc.nav_map.nav_point[0].nav_point]
-	title = book.toc.title
-	summary = 'This is a compilation of articles from Wikipedia about %s, formatted as an ebook for easy reading.  Topics include:\n' % title
+	title = book.toc.title.split('(')[0]
+	summary = 'This is a compilation of articles from Wikipedia about %s, formatted as an ebook for easy reading.  Topics include:<br/>' % title
 	chapterNames = sorted([a.split('(')[0] for a in chapterNames])
-	summary += '\n'.join(chapterNames)
+	summary += '<br/>'.join(chapterNames)
 	return (title, summary)
 
 parser = OptionParser()
