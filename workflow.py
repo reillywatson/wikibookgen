@@ -12,7 +12,7 @@ def get_book_fields(path):
 	return (title, summary)
 
 cats = codecs.open('cats.txt', 'r', 'utf-8').read().split('\n')
-published = codecs.open('published.txt', 'r', 'utf-8').read().split('\n')
+published = codecs.open('done.txt', 'r', 'utf-8').read().split('\n')
 cats = [a for a in cats if a not in published]
 for cat in cats:
 	print 'processing %s' % cat
