@@ -123,7 +123,7 @@ casper.waitForText('done!', null, function() {
 	var d = new Date();
 	this.capture('pubfail'+d.getTime()+'.png');
 	this.die('publishing timed out!');
-}, 30000);
+}, 60000);
 
 casper.then(function() {
 	var dialogText = this.fetchText('.modalWindow');
