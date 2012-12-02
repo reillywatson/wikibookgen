@@ -33,6 +33,6 @@ for cat in cats:
 	if retcode != 0:
 		print 'failed to publish!'
 		continue
-	with codecs.open('done.txt', 'w', 'utf8') as out:
+	with codecs.open('done.txt', 'a', 'utf8') as out:
 		out.write(cat+'\n')
 	print 'success!'
