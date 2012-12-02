@@ -12,3 +12,5 @@ done.txt
 *.epub
 
 pubfail*.png
+
+timeout.png
