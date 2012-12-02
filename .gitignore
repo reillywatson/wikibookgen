@@ -8,3 +8,5 @@ test.epub
 .DS_Store
 
 *.pyc
+
+done.txt
