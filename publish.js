@@ -16,6 +16,7 @@ var bookTitle = casper.cli.get('title')
 var summary = casper.cli.get('summary')
 var userName = casper.cli.get('user')
 var password = casper.cli.get('pass')
+var filename = casper.cli.get('file')
 
 casper.start('http://writinglife.kobobooks.com');
 
@@ -29,6 +30,7 @@ casper.then(function() {
 
 casper.thenOpen('https://writinglife.kobobooks.com/ebooks#ebooklibrary/authors');
 casper.thenClick('#booksLibraryNewDraftButton');
+casper.waitForText('Describe the', null, null, 10000);
 casper.then(function() {
 	this.echo('creating new book')
 	this.fill('form#metadata', {
@@ -63,8 +65,7 @@ casper.waitForText('What you need to know before', null, function() {
 
 // requires phantomjs 1.8 or higher to work
 casper.page.onFilePicker = function(oldFile) {
-	casper.echo('file picker!');
-	return 'test.epub';
+	return filename;
 };
 
 casper.wait(1000);
@@ -118,7 +119,6 @@ casper.thenClick('#detailsSaveAndNext');
 casper.waitForText('ready to start selling');
 casper.wait(3000);
 casper.thenClick('#publishBookSubmit');
-casper.wait(3000);
 casper.waitForText('done!', null, function() {
 	var d = new Date();
 	this.capture('pubfail'+d.getTime()+'.png');
@@ -133,9 +133,6 @@ casper.then(function() {
 		this.die('publishing failed!' + dialogText, 1);
 	}
 });
-
-casper.thenClick('.modalWindow b');
-casper.wait(1000);
 
 casper.run(function() {
 	this.echo('done!').exit();
