@@ -9,6 +9,7 @@ if (!casper.cli.has('cat')) {
 }
 
 var categoryUrl = casper.cli.get('cat');
+var filename = casper.cli.get('out');
 var bookTitle = categoryUrl.replace(/_/g, ' ');
 bookTitle = toTitleCase(bookTitle);
 var urlEncodedCategory = categoryUrl.replace(/_/g , ' ');
@@ -53,7 +54,7 @@ casper.then(function() {
 		}
 	});
 	this.echo('downloading: ' + url);
-	this.download(url, 'test.epub');
+	this.download(url, filename);
 });
 
 casper.run(function() {
