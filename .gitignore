@@ -8,3 +8,5 @@ test.epub
 *.pyc
 
 done.txt
+
+*.epub
