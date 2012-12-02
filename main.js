@@ -1,3 +1,7 @@
+var toTitleCase = function(str) {
+    return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+}
+
 var casper = require('casper').create({
     onError: function(self, m) {   // Any "error" level message will be written
         console.log('FATAL:' + m); // on the console output and PhantomJS will
@@ -5,10 +9,13 @@ var casper = require('casper').create({
     }
 });
 
-var toTitleCase = function(str)
-{
-    return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+
+if (!casper.cli.has('cat')) {
+	casper.die('required parameter: --cat=some_category_url', 1);
+	casper.start();
+	casper.run();
 }
+
 
 var categoryUrl = casper.cli.get('cat');
 var bookTitle = categoryUrl.replace(/_/g, ' ');
