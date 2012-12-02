@@ -5,9 +5,7 @@ var toTitleCase = function(str) {
 var casper = require('casper').create();
 
 if (!casper.cli.has('cat')) {
-	casper.die('required parameter: --cat=some_category_url', 1);
-	casper.start();
-	casper.run();
+	throw new Error("required parameter: --cat=some_category_url");
 }
 
 var categoryUrl = casper.cli.get('cat');
