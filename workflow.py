@@ -4,12 +4,23 @@ import epub
 from optparse import OptionParser
 import os
 import multiprocessing
+from bs4 import BeautifulSoup
+import requests
+
+def get_description(title):
+	response = requests.get('http://lookup.dbpedia.org/api/search.asmx/KeywordSearch', params={'QueryString':title, 'MaxHits' : 1})
+	soup = BeautifulSoup(response.content)
+	if soup.result and soup.result.description:
+		return soup.result.description.text + u'<br/>'
+	else:
+		return ''
 
 def get_book_fields(path):
 	book = epub.open_epub(path)
 	chapterNames = [a.labels[0][0] for a in book.toc.nav_map.nav_point[0].nav_point]
 	title = book.toc.title.split('(')[0]
-	summary = 'This is a compilation of articles from Wikipedia about %s, formatted as an ebook for easy reading.  Topics include:<br/>' % title
+	summary = get_description(book.toc.title)
+	summary += 'This is a compilation of articles from Wikipedia about %s, formatted as an ebook for easy reading.  Topics include:<br/>' % title
 	chapterNames = sorted([a.split('(')[0] for a in chapterNames])
 	summary += '<br/>'.join(chapterNames)
 	return (title, summary)
@@ -24,24 +35,28 @@ password = options.password
 mutex = multiprocessing.Lock()
 
 def process_book(cat):
-	print 'processing %s' % cat
-	filename = os.tempnam('.')[2:].replace('.','-') + '.epub'
-	print filename
-	retcode = subprocess.call(['casperjs', 'main.js', '--cat=%s'%cat, '--out=%s'%filename])
-	if retcode != 0:
-		print 'failed to fetch!'
+	try:
+		print 'processing %s' % cat
+		filename = os.tempnam('.')[2:].replace('.','-') + '.epub'
+		print filename
+		retcode = subprocess.call(['casperjs', 'main.js', '--cat=%s'%cat, '--out=%s'%filename])
+		if retcode != 0:
+			print 'failed to fetch!'
+			return False
+		(title, summary) = get_book_fields(filename)
+		retcode = subprocess.call(['casperjs', 'publish.js', '--file=%s'%filename, '--title=%s'%title, '--summary=%s'%summary, '--user=%s'%userName, '--pass=%s'%password])
+		if retcode != 0:
+			print 'failed to publish!'
+			return False
+		with mutex:
+			with codecs.open('done.txt', 'a', 'utf8') as out:
+				out.write(cat+'\n')
+		print 'success!'
+		os.remove(filename)
+		return True
+	except:
+		print 'exception!'
 		return False
-	(title, summary) = get_book_fields(filename)
-	retcode = subprocess.call(['casperjs', 'publish.js', '--file=%s'%filename, '--title=%s'%title, '--summary=%s'%summary, '--user=%s'%userName, '--pass=%s'%password])
-	if retcode != 0:
-		print 'failed to publish!'
-		return False
-	with mutex:
-		with codecs.open('done.txt', 'a', 'utf8') as out:
-			out.write(cat+'\n')
-	print 'success!'
-	os.remove(filename)
-	return True
 
 cats = codecs.open('cats.txt', 'r', 'utf-8').read().split('\n')
 published = codecs.open('done.txt', 'r', 'utf-8').read().split('\n')
