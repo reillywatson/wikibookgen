@@ -6,6 +6,7 @@ import os
 import multiprocessing
 from bs4 import BeautifulSoup
 import requests
+from datetime import datetime
 
 def get_description(title):
 	response = requests.get('http://lookup.dbpedia.org/api/search.asmx/KeywordSearch', params={'QueryString':title, 'MaxHits' : 1})
@@ -37,6 +38,7 @@ mutex = multiprocessing.Lock()
 def process_book(cat):
 	filename = os.tempnam('.')[2:].replace('.','-') + '.epub'
 	try:
+		startTime = datetime.now()
 		print 'processing %s' % cat
 		print filename
 		retcode = subprocess.call(['casperjs', 'main.js', '--cat=%s'%cat, '--out=%s'%filename])
@@ -53,17 +55,20 @@ def process_book(cat):
 		with mutex:
 			with codecs.open('done.txt', 'a', 'utf8') as out:
 				out.write(cat+'\n')
-		print 'success!'
+		print 'success!', (datetime.now() - startTime).total_seconds()
 		os.remove(filename)
 		return True
 	except:
 		print 'exception!'
-		os.remove(filename)
+		try:
+			os.remove(filename)
+		except:
+			pass
 		return False
 
 cats = codecs.open('cats.txt', 'r', 'utf-8').read().split('\n')
 published = codecs.open('done.txt', 'r', 'utf-8').read().split('\n')
 cats = [a for a in cats if a not in published]
-p = multiprocessing.Pool(4)
+p = multiprocessing.Pool(24)
 p.map(process_book, cats)
 
