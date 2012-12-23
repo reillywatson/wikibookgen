@@ -47,11 +47,15 @@ def process_book(cat):
 			os.remove(filename)
 			return False
 		(title, summary) = get_book_fields(filename)
-		retcode = subprocess.call(['casperjs', 'publish.js', '--file=%s'%filename, '--title=%s'%title, '--summary=%s'%summary, '--user=%s'%userName, '--pass=%s'%password])
-		if retcode != 0:
-			print 'failed to publish!'
-			os.remove(filename)
-			return False
+		for tries in range(3):
+			retcode = subprocess.call(['casperjs', 'publish.js', '--file=%s'%filename, '--title=%s'%title, '--summary=%s'%summary, '--user=%s'%userName, '--pass=%s'%password])
+			if retcode == 0:
+				break
+			else:
+				print 'failed to publish!'
+				if tries == 2:
+					os.remove(filename)
+					return False
 		with mutex:
 			with codecs.open('done.txt', 'a', 'utf8') as out:
 				out.write(cat+'\n')
@@ -69,6 +73,6 @@ def process_book(cat):
 cats = codecs.open('cats.txt', 'r', 'utf-8').read().split('\n')
 published = codecs.open('done.txt', 'r', 'utf-8').read().split('\n')
 cats = [a for a in cats if a not in published]
-p = multiprocessing.Pool(24)
+p = multiprocessing.Pool(48)
 p.map(process_book, cats)
 

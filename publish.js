@@ -78,7 +78,7 @@ casper.thenClick('#bookContentSubmit');
 
 casper.waitForText('Upload complete', null, function() {
 	this.echo('timeout waiting for upload!');this.capture('timeout.png');
-}, 60*1000);
+}, 180*1000);
 
 casper.then(function() {
 	this.echo('upload complete!');
