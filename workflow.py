@@ -7,6 +7,7 @@ import multiprocessing
 from bs4 import BeautifulSoup
 import requests
 from datetime import datetime
+import time
 
 def get_description(title):
 	response = requests.get('http://lookup.dbpedia.org/api/search.asmx/KeywordSearch', params={'QueryString':title, 'MaxHits' : 1})
@@ -56,6 +57,7 @@ def process_book(cat):
 				if tries == 2:
 					os.remove(filename)
 					return False
+				time.sleep(10)
 		with mutex:
 			with codecs.open('done.txt', 'a', 'utf8') as out:
 				out.write(cat+'\n')
