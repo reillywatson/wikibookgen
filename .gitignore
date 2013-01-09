@@ -14,3 +14,5 @@ done.txt
 pubfail*.png
 
 timeout.png
+
+*.swp
