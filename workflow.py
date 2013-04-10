@@ -8,6 +8,7 @@ from bs4 import BeautifulSoup
 import requests
 from datetime import datetime
 import time
+import random
 
 def get_description(title):
 	response = requests.get('http://lookup.dbpedia.org/api/search.asmx/KeywordSearch', params={'QueryString':title, 'MaxHits' : 1})
@@ -75,6 +76,9 @@ def process_book(cat):
 cats = codecs.open('cats.txt', 'r', 'utf-8').read().split('\n')
 published = codecs.open('done.txt', 'r', 'utf-8').read().split('\n')
 cats = [a for a in cats if a not in published]
-p = multiprocessing.Pool(48)
-p.map(process_book, cats)
+random.shuffle(cats)
+for cat in cats:
+	process_book(cat)
+#p = multiprocessing.Pool()
+#p.map(process_book, cats)
 
