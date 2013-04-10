@@ -1,6 +1,8 @@
 var casper = require('casper').create({
     onError: function(self, m) {   // Any "error" level message will be written
         console.log('FATAL:' + m); // on the console output and PhantomJS will
+		var d = new Date();
+		self.capture('pubfail'+d.getTime()+'.png');
         self.exit();               // terminate
     }
 });
@@ -115,7 +117,7 @@ casper.wait(3000);
 
 casper.thenClick('#detailsSaveAndNext');
 
-casper.waitForText('ready to start selling');
+casper.waitForText('Publish eBook');
 casper.wait(3000);
 casper.thenClick('#publishBookSubmit');
 casper.waitForText('done!', null, function() {
