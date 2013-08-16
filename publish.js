@@ -19,7 +19,7 @@ var userName = casper.cli.get('user')
 var password = casper.cli.get('pass')
 var filename = casper.cli.get('file')
 
-casper.start('http://writinglife.kobobooks.com');
+casper.start('http://writinglife.kobobooks.com/dashboard');
 
 casper.then(function() {
 	this.echo('signing in')
@@ -49,7 +49,7 @@ casper.thenClickLabel('Reference');
 casper.thenClickLabel('Encyclopedias');
 casper.wait(1000);
 casper.thenClickLabel('Confirm');
-casper.thenClick('#cke_contents_synopsis');
+casper.thenClick('#cke_synopsis');
 casper.wait(1000);
 casper.thenEvaluate(function(summaryText) {
 	CKEDITOR.instances.synopsis.setData(summaryText);
@@ -79,8 +79,9 @@ casper.wait(1000);
 casper.thenClick('#bookContentSubmit');
 
 casper.waitForText('Upload complete', null, function() {
-	this.echo('timeout waiting for upload!');this.capture('timeout.png');
-}, 180*1000);
+	this.capture('timeout.png');
+	this.die('timeout waiting for upload!', 1);
+}, 45*1000);
 
 casper.then(function() {
 	this.echo('upload complete!');
